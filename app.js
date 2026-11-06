@@ -94,6 +94,66 @@ logBtn.addEventListener('click', () => {
 document.addEventListener('visibilitychange', render);
 window.addEventListener('focus', render);
 
+/* ---------- notification messages & scheduler ---------- */
+
+const REMINDER_MESSAGES = [
+  "Time for a sip! Keep your body happy and hydrated 💧",
+  "Water break! A fresh glass will boost your energy 💙",
+  "Hydration check: Grab a glass of water now 🌊",
+  "Take a breather and drink a glass of water 💧",
+  "Staying hydrated keeps your mind clear and sharp ✨",
+  "A cool glass of water is just what you need right now 💧",
+  "Stay glowing and refreshed — time to drink up! 💙",
+  "Water reminder: Your daily goal is within reach 🌊",
+  "Don't forget to drink water — future you will thank you! 💧",
+  "Hydration check-in: Let's log another glass! 🎉💙"
+];
+
+const MSG_INDEX_KEY = 'hydrationBuddyMsgIndex';
+
+function getNextReminderMessage() {
+  const currentIndex = parseInt(localStorage.getItem(MSG_INDEX_KEY) || '0', 10);
+  const message = REMINDER_MESSAGES[currentIndex % REMINDER_MESSAGES.length];
+  localStorage.setItem(MSG_INDEX_KEY, ((currentIndex + 1) % REMINDER_MESSAGES.length).toString());
+  return message;
+}
+
+// Production: 60 * 60 * 1000 (3600000 ms = 1 hour)
+const NOTIFICATION_INTERVAL_MS = 5 * 60 * 1000; // 300000 ms // TESTING MODE - REVERT BEFORE PRODUCTION
+
+// Production check: currentHour >= 8 && currentHour <= 22 (8:00 AM - 10:00 PM in local time zone)
+function isWithinAllowedHours() {
+  // const currentHour = new Date().getHours(); // TESTING MODE - REVERT BEFORE PRODUCTION
+  // return currentHour >= 8 && currentHour <= 22; // TESTING MODE - REVERT BEFORE PRODUCTION
+  return true; // TESTING MODE - REVERT BEFORE PRODUCTION: bypassed 8 AM - 10 PM check for 24/7 testing
+}
+
+let reminderTimer = null;
+
+async function triggerNotification() {
+  if (!isWithinAllowedHours()) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const bodyText = getNextReminderMessage();
+    await reg.showNotification('Hydration Buddy 💧', {
+      body: bodyText,
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      tag: 'hydration-reminder',
+      renotify: true
+    });
+  } catch (err) {
+    console.error('Error showing notification:', err);
+  }
+}
+
+function startScheduler() {
+  if (reminderTimer) clearInterval(reminderTimer);
+  reminderTimer = setInterval(triggerNotification, NOTIFICATION_INTERVAL_MS); // TESTING MODE - REVERT BEFORE PRODUCTION
+}
+
 /* ---------- Enable Reminders ---------- */
 
 async function registerServiceWorker() {
@@ -128,9 +188,11 @@ enableBtn.addEventListener('click', async () => {
   }
 
   if (permission === 'granted') {
-    statusLine.textContent = 'Reminders enabled! 💙 (Hourly nudges arrive in Stage 2.)';
+    statusLine.textContent = 'Reminders enabled! 💙 (Testing: firing every 5 mins 24/7)'; // TESTING MODE - REVERT BEFORE PRODUCTION
     enableBtn.disabled = true;
     enableBtn.textContent = 'Reminders Enabled ✓';
+    await triggerNotification();
+    startScheduler();
   } else if (permission === 'denied') {
     statusLine.textContent = 'Notifications are blocked. Fix: Settings → your app → turn Notifications on.';
   } else {
@@ -145,5 +207,12 @@ render();
 // Register the service worker on launch too, so caching works even if she
 // never taps Enable Reminders.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  navigator.serviceWorker.register('service-worker.js').then(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      enableBtn.disabled = true;
+      enableBtn.textContent = 'Reminders Enabled ✓';
+      statusLine.textContent = 'Reminders active 💙 (Testing: firing every 5 mins 24/7)'; // TESTING MODE - REVERT BEFORE PRODUCTION
+      startScheduler();
+    }
+  }).catch(() => {});
 }
