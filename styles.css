@@ -1,0 +1,172 @@
+/* Hydration Buddy — calm, water-themed, mobile-first */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --blue-deep: #1769ff;
+  --blue-mid: #4aa8ff;
+  --blue-soft: #bfe3ff;
+  --ink: #123a6b;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, #eaf6ff 0%, #d3ecff 45%, #b7dfff 100%);
+  min-height: 100dvh;
+}
+
+.app {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: calc(24px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  min-height: 100dvh;
+  justify-content: center;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--blue-deep);
+}
+
+/* ---------- progress ring ---------- */
+
+.ring-wrap {
+  position: relative;
+  width: min(68vw, 280px);
+  aspect-ratio: 1;
+}
+
+.ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* start the ring at 12 o'clock */
+}
+
+.ring circle {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.ring-bg {
+  stroke: rgba(255, 255, 255, 0.75);
+}
+
+.ring-fg {
+  stroke: url(#ringGradient); /* fallback below if gradient missing */
+  stroke: var(--blue-deep);
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.ring-count {
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: var(--blue-deep);
+  line-height: 1;
+}
+
+.ring-goal {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  opacity: 0.8;
+}
+
+.ring-label {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+/* ---------- encouragement ---------- */
+
+.encourage {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  min-height: 3.2em;
+  max-width: 320px;
+  line-height: 1.45;
+}
+
+/* ---------- buttons ---------- */
+
+.btn-log {
+  width: min(80vw, 300px);
+  padding: 20px 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, var(--blue-mid), var(--blue-deep));
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(23, 105, 255, 0.35);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.btn-log:active {
+  transform: scale(0.96);
+  box-shadow: 0 4px 12px rgba(23, 105, 255, 0.3);
+}
+
+.btn-log.splash {
+  animation: splash 0.35s ease;
+}
+
+@keyframes splash {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.btn-enable {
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--blue-deep);
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid var(--blue-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn-enable:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.status {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  text-align: center;
+  min-height: 1.2em;
+}
